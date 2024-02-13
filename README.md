@@ -3,6 +3,18 @@ A game engine
 
 ---
 
+## Compiling and Running
+
+### Run
+```sh
+make
+```
+
+### Compile only
+```sh
+make normal
+```
+
 ## Requirements
 Ensure you have the following installed on your system
 
@@ -25,4 +37,4 @@ sudo apt-get install -y libglew-dev
 
 ## TODO
 - CMake
-- The while engine thingy
+- The whole engine thingy
