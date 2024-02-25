@@ -6,7 +6,7 @@
 CXX = g++
 
 # Specific flags for different build profiles
-COMMON_CFLAGS = -Wall -fdiagnostics-color=auto
+COMMON_CFLAGS = -Wall -fdiagnostics-color=auto -Iinclude
 LIBS = -lglfw -lGLEW -lGLU -lGL
 
 # Just a normal thingy
@@ -22,6 +22,7 @@ CFLAGS_RELEASE = $(COMMON_CFLAGS) -O3 -fno-math-errno -fomit-frame-pointer -fno-
 # Fast but unstable for release
 CFLAGS_FAST = $(COMMON_CFLAGS) -Ofast -march=native -fno-math-errno -fomit-frame-pointer -fno-strict-aliasing \
     -flto -fuse-linker-plugin -fprefetch-loop-arrays -ftree-vectorize
+
 #=============================================================================
 # Set environment variables for the build.
 
@@ -30,8 +31,12 @@ SHELL = /bin/sh
 
 #=============================================================================
 # Source files and executable
-SRC = $(wildcard src/*.cpp)
-EXECUTABLE = bin/main
+SRC_DIR := src
+OBJ_DIR := obj
+BIN_DIR := bin
+SRC := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC))
+EXECUTABLE := $(BIN_DIR)/main
 
 #=============================================================================
 # Default target rule
@@ -45,8 +50,12 @@ all: normal debug fast release
 #=============================================================================
 # Build target rules
 define build_rule
-$(1): bin $(SRC)
-	$$(CXX) $($(2)) $(SRC) -o $$(EXECUTABLE)_$(1) $$(LIBS)
+$(1): $(BIN_DIR) $(OBJ_DIR) $$(OBJ)
+	$$(CXX) $($(2)) -o $(EXECUTABLE)_$(1) $$(OBJ) $$(LIBS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$$(CXX) -c $$< -o $$@
+
 endef
 
 $(foreach target, normal debug fast release, $(eval $(call build_rule,$(target),CFLAGS_$(shell echo $(target) | tr '[:lower:]' '[:upper:]'))))
@@ -79,15 +88,16 @@ endef
 
 $(foreach target, normal debug fast release, $(eval $(call clean_rule,$(target))))
 
-clean: clean-normal clean-debug clean-fast clean-release
+clean:
+	rm -rf $(BIN_DIR) $(OBJ_DIR)
 
 .PHONY: clean clean-normal clean-debug clean-fast clean-release
 
 #=============================================================================
-# Create stuff if not existing
+# Directory creation
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
-# Directories
-bin:
-	mkdir -p bin
-
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 

@@ -1,15 +1,23 @@
+// normal stuff
 #include <iostream>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <string>
 
-#define __DEBUG__
+// OpenGL stuff
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
-#ifdef __DEBUG__
-#define LOG(x) std::cout << x << std::endl
-#else
-#define LOG(x)
-#endif
+// Engine stuff
+
+// changing the building mode of the makefile won't disable debugging
+// automatically and vice versa
+#define __DEBUG__ // comment this line to disable debugging code
+
+#include "include/buffer_array.hpp"
+#include "include/buffer.hpp"
+#include "include/shader.hpp"
+
+#include "include/debug.hpp"
+#include "include/utils.hpp"
 
 // Prototypes
 static inline void framebuffer_size_callback(GLFWwindow *window, int width,
@@ -17,19 +25,11 @@ static inline void framebuffer_size_callback(GLFWwindow *window, int width,
 
 static inline void processInput(GLFWwindow *window);
 
-static unsigned int CreateShader(std::string shaderSource, int type);
-
-static unsigned int CreateShaderProgram(std::string &vertexShaderSource,
-                                        std::string &fragmentShaderSource);
-
-static inline void glfwError(std::string msg) {
-    std::cout << msg << std::endl;
-    glfwTerminate();
-}
-
 // Settings
 static const unsigned int SCREEN_WIDTH = 800;
 static const unsigned int SCREEN_HEIGHT = 600;
+static const bool VSYNC = false; // set to true to enable VSync
+// #define __MAC__                  // if you are on MacOS uncomment this line
 
 int main(void) {
     // Initialize and configure glfw
@@ -38,12 +38,12 @@ int main(void) {
         return -1;
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    GLCALL(glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3));
+    GLCALL(glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3));
+    GLCALL(glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE));
 
 #ifdef __MAC__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    GLCALL(glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE));
 #endif
 
     // Glfw window creation
@@ -54,8 +54,9 @@ int main(void) {
         return -1;
     }
 
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    GLCALL(glfwMakeContextCurrent(window));
+    GLCALL(glfwSetFramebufferSizeCallback(window, framebuffer_size_callback));
+    GLCALL(glfwSwapInterval((int)VSYNC)); // vsync
 
     // Glew: load all OpenGL function pointers
     GLenum err = glewInit();
@@ -67,31 +68,21 @@ int main(void) {
 
     LOG("Initialized OpenGL\nOpenGL Version: " << glGetString(GL_VERSION));
 
-    LOG("Starting generating lil triangle");
+#ifdef __DEBUG__
+    int nrAttributes;
+    GLCALL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes));
+    LOG("Maximum number of vertex attributes supported: " << nrAttributes)
+#endif
+
+    LOG("Starting to generate the lil triangle");
+
     // Build and compile shader program
     LOG("Creating a shader program");
-    std::string vertexShaderSource =
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "layout (location = 1) in vec4 aColor;\n"
-        "out vec4 ourColor;\n" // Changed to 'out' variable
-        "void main()\n"
-        "{\n"
-        "   ourColor = aColor;\n" // Assign aColor to ourColor
-        "   gl_Position = vec4(aPos.xyz, 1.0);\n"
-        "}\0";
+    std::string vertexShaderSource = GetFile("res/shaders/vert.glsl");
 
-    std::string fragmentShaderSource =
-        "#version 330 core\n"
-        "in vec4 ourColor;\n"   // Use ourColor from the vertex shader
-        "out vec4 FragColor;\n" // Changed to 'out' variable
-        "void main()\n"
-        "{\n"
-        "   FragColor = ourColor;\n" // Removed 'f' suffix
-        "}\n\0";
+    std::string fragmentShaderSource = GetFile("res/shaders/frag.glsl");
 
-    unsigned int shaderProgram =
-        CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
+    Shader shader(fragmentShaderSource, vertexShaderSource);
 
     float vertices[] = {
         //    Position     |      Color
@@ -107,67 +98,87 @@ int main(void) {
     };
 
     LOG("Creating VBOs, VAOs and EBOs");
-    unsigned int VBO, VAO, EBO;
+
+    // IDs
+    unsigned int VAO;
 
     // VAO
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
+    BufferArray vao;
+
+    vao.bind();
+
+    Buffer ebo(GL_ELEMENT_ARRAY_BUFFER);
+    Buffer vbo(GL_ARRAY_BUFFER);
+
     // VBO
-    glGenBuffers(1, &VBO); // Assign a buffer to the buffer object id thingy
+    vbo.bind();
+    vbo.data(vertices, sizeof(vertices));
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind the buffer to target
+    vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE, (void *)0, 1);
+    vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE,
+                                 (void *)(3 * sizeof(float)), 1);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
-                 GL_STATIC_DRAW); // loads data into buffer
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                          6 * sizeof(float), // Position
-                          (void *)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), // Color
-                          (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // EBO
-    glGenBuffers(1, &EBO); // Assign a buffer to the buffer object id thingy
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
+    ebo.bind();
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
                  GL_STATIC_DRAW);
 
-    // Unbind buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    LOG("Finished generating our lil triangle");
 
-    LOG("Finished generatin our lil triangle");
+    // Clear stuff
+    GLCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    GLCALL(glBindVertexArray(0));
+    GLCALL(glUseProgram(0));
 
-    LOG("Starting main loop");
+    LOG("Starting main loop...");
+
+    float r = 1.0;
+    float increment = 0.05;
+    float lastTime = glfwGetTime();
+    float deltaTime;
 
     while (!glfwWindowShouldClose(window)) {
+        // Get delta time
+        deltaTime = glfwGetTime() - lastTime;
+        lastTime = glfwGetTime();
+
+        // Proccess input
         processInput(window);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // Clear the frame buffer
+        GLCALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+        GLCALL(glClear(GL_COLOR_BUFFER_BIT));
 
-        glUseProgram(shaderProgram);
+        // bind a shader
+        shader.bind();
 
-        glBindVertexArray(VAO);
+        shader.set_Uniform4f("u_Time", r, r, r, r);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        vao.bind();
+        ebo.bind();
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); // Draw
+
+        // Change r by time and stuff
+        if (r > 2) {
+            increment = -0.05 * deltaTime * 60;
+        } else if (r < 0) {
+            increment = 0.05 * deltaTime * 60;
+        }
+
+        r += increment;
+
+        glfwSwapBuffers(window); // Swap frame buffers
+        glfwPollEvents();        // Poll for events (amazing explanation)
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
+    LOG("Cleaning up...");
 
     glfwTerminate();
-    LOG("GLFW was terminated successfully");
+    LOG("GLFW was terminated successfully... mission failed successfully!");
 
     return 0;
 }
@@ -183,7 +194,7 @@ static inline void processInput(GLFWwindow *window) {
         glfwSetWindowShouldClose(window, true);
 
     static bool lock = 0, wf_mode = 0;
-    if (!glfwGetKey(window, GLFW_KEY_W)) {
+    if (!glfwGetKey(window, GLFW_KEY_W)) { // press W to toggle wireframe mode
         lock = 0;
     }
     if (glfwGetKey(window, GLFW_KEY_W) && lock == 0) {
@@ -193,57 +204,20 @@ static inline void processInput(GLFWwindow *window) {
     }
 }
 
-static unsigned int CreateShader(std::string shaderSource, int type) {
-    unsigned int shader;
-    shader = glCreateShader(type);
-
-    const char *sourcePtr = shaderSource.c_str();
-    glShaderSource(shader, 1, &sourcePtr, nullptr);
-    glCompileShader(shader);
-
-    int success;
-    char infoLog[512];
-
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-        std::cout << "ERROR::SHADER::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
-    }
-
-    return shader;
-}
-
-static unsigned int CreateShaderProgram(std::string &vertexShaderSource,
-                                        std::string &fragmentShaderSource) {
-    unsigned int vertexShader;
-    vertexShader = CreateShader(vertexShaderSource, GL_VERTEX_SHADER);
-
-    unsigned int fragmentShader;
-    fragmentShader = CreateShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    int success;
-    char infoLog[512];
-
-    glGetShaderiv(shaderProgram, GL_LINK_STATUS, &success);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER_PROGRAM::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
-    }
-
-    glDeleteProgram(vertexShader);
-    glDeleteProgram(fragmentShader);
-
-    return shaderProgram;
-}
+// TODO:
+// sorted mostly by priority
+// --------------------------
+// [ ] shader abstraction
+// [ ] small cleanup
+// [ ] better errors
+// --------- extras ---------
+// [ ] cool shader
+// [ ] CMAKE
+// [ ] find out why program fails when i don't bind the EBO every frame (the VAO
+// should be doing that automatically)
+// --------- done ---------
+// [x] include folder without clangd lsp freaking out
+// [x] fix stupid shader errors
+// [x] file reading (for shaders)
+// [x] deltaTime
+// [x] vsync support (literally 2 lines of code)

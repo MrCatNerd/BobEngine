@@ -1,5 +1,11 @@
 # Custom
 bin/
+obj/
+
+# Bear stuff
+# when BobEngine will use cmake i will need to update this probably
+compile_commands.json
+.cache
 
 # Prerequisites
 *.d
