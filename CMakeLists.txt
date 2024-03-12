@@ -32,18 +32,18 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}$<0:>" # Handle resource dependencies
 )
 
-# Add GLEW library
-find_package(GLEW REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
-
-# Add GLFW library
-find_package(glfw3 CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
-
+# Add general OpengGL package
 find_package(OpenGL REQUIRED)
 target_link_libraries(BobEngine PRIVATE ${OPENGL_LIBRARIES})
 target_include_directories(BobEngine PRIVATE ${OPENGL_INCLUDE_DIR})
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Add GLEW package
+find_package(GLEW REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
 
+# Add GLFW package
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+
+# set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # compile_commands.json (you don't need this i got a thingy in the Makefile that does the same thing)
 
