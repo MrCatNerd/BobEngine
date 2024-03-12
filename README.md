@@ -6,28 +6,26 @@ current features: triangles, triangles, triangles and bugs lol
 ---
 
 
-### WARNING: this engine is still a WIP and currently only supports Linux
+### WARNING: this engine is still a WIP
 
 
-## Compiling and Running
+## Compiling Running and Cleaning
 
 ### Running
 ```sh
 make
-
 # or
-#mkdir -p build
-#cmake . -B build
-#make -C build
+#make run
 ```
 
 ### Building
 ```sh
 make compile
+```
 
-# or
-#mkdir -p build
-#cmake . -B build
+### Cleaning
+```sh
+make clean
 ```
 
 ## Requirements
@@ -51,7 +49,7 @@ sudo make -C "/usr/local/lib/glfw/build" install
   <summary>How to install GLFW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
 
   ```sh
-  vcpkg install --head glfw3
+  vcpkg install glfw3
   ```
 </details>
 
@@ -62,7 +60,6 @@ sudo make -C "/usr/local/lib/glfw/build" install
 
 ```sh
 # installs GLEW on debian based systems
-sudo apt-get update
 sudo apt-get install -y libglew-dev
 ```
 </details>
@@ -71,20 +68,22 @@ sudo apt-get install -y libglew-dev
   <summary>How to install GLEW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
 
   ```sh
-  vcpkg install --head glew
+  vcpkg install glew
   ```
 </details>
 
-## LSP and compilation databases
-
-BobEngine currently uses Make instead of CMake.
-If you're using Neovim with an LSP like Clangd, you'll need a compilation database to avoid errors
-you can use a tool like bear to do it
+### OpenGL???
+idk cmake wants glfw, glew and opengl... just install it from vcpkg:
 
 ```sh
-#sudo apt install -y bear
-#yes | sudo pacman -S bear
-make clean; bear -- make all
+vcpkg install opengl
+```
+
+
+## LSP and compilation databases
+
+```sh
+make compile_commands.json
 ```
 
 ---
@@ -94,7 +93,7 @@ make clean; bear -- make all
 mostly sorted by priority
 
  - [ ] The whole engine thingy
- - [ ] CMake
+ - [x] CMake
  - [ ] Good README
  - [ ] Examples
  - [ ] Docs

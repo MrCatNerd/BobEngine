@@ -1,7 +1,8 @@
 ### Custom ###
 build
 .cache
-BobEngine # the exe
+# the exe thingy
+BobEngine
 
 ### CMake ###
 MakeLists.txt.user
