@@ -5,7 +5,7 @@ current features: triangles, triangles, triangles and bugs lol
 
 ---
 
-<img src="https://github.com/MrCatNerd/BobEngine/blob/dev/.github/bob.jpg?raw=true" alt="Bob" style="max-width:80%; max-height:80%;">
+<img src="https://github.com/MrCatNerd/BobEngine/blob/dev/res/bob.jpg?raw=true" alt="Bob" style="max-width:80%; max-height:80%;">
 
 ### WARNING: this engine is still a WIP
 
