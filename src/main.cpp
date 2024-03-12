@@ -8,16 +8,12 @@
 
 // Engine stuff
 
-// changing the building mode of the makefile won't disable debugging
-// automatically and vice versa
-#define __DEBUG__ // comment this line to disable debugging code
+#include "buffer_array.hpp"
+#include "buffer.hpp"
+#include "shader.hpp"
 
-#include "include/buffer_array.hpp"
-#include "include/buffer.hpp"
-#include "include/shader.hpp"
-
-#include "include/debug.hpp"
-#include "include/utils.hpp"
+#include "debug.hpp"
+#include "utils.hpp"
 
 // Prototypes
 static inline void framebuffer_size_callback(GLFWwindow *window, int width,
@@ -83,6 +79,8 @@ int main(void) {
     std::string fragmentShaderSource = GetFile("res/shaders/frag.glsl");
 
     Shader shader(fragmentShaderSource, vertexShaderSource);
+    shader.bind();
+    shader.set_Uniform4f("u_Time", 0.0, 0.0, 0.0, 0.0);
 
     float vertices[] = {
         //    Position     |      Color
@@ -152,15 +150,18 @@ int main(void) {
         GLCALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
         GLCALL(glClear(GL_COLOR_BUFFER_BIT));
 
-        // bind a shader
+        // Bind a shader
         shader.bind();
 
-        shader.set_Uniform4f("u_Time", r, r, r, r);
+        // Set the uniform
+        // shader.set_Uniform4f("u_Time", r, r, r, r);
 
+        // Bind VAO and EBO
         vao.bind();
         ebo.bind();
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); // Draw
+        // Draw
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // Change r by time and stuff
         if (r > 2) {

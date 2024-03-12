@@ -1,8 +1,8 @@
 #include <iostream>
 
 // file reading stuff
-#include "include/utils.hpp"
-#include "include/debug.hpp"
+#include "utils.hpp"
+#include "debug.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -21,12 +21,14 @@ std::string GetFile(const std::string &path) {
             buffer << file.rdbuf();
             content = buffer.str();
             file.close();
-            LOG(std::string("File '") + path + "' successfully read.");
+            LOG(std::string("File '") + path + "' successfully read");
         } else {
             std::cerr << "Unable to open file '" << path << "'" << std::endl;
         }
     } catch (std::ifstream::failure e) {
-        std::cout << "ERROR::FILE_READ::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        std::cout << "[Reading Error] FILE_READ::FILE_NOT_SUCCESFULLY_READ L "
+                     "BOZO HOW DID YOU FAIL THIS?"
+                  << std::endl;
     }
 
     return content;

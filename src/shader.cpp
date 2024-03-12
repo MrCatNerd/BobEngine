@@ -1,7 +1,8 @@
 #include <GL/glew.h>
+#include <unordered_map>
 
-#include "include/shader.hpp"
-#include "include/debug.hpp"
+#include "shader.hpp"
+#include "debug.hpp"
 
 unsigned int Shader::create_shader(const char *shader_src, int type) const {
     unsigned int shader = glCreateShader(type);
@@ -14,8 +15,24 @@ unsigned int Shader::create_shader(const char *shader_src, int type) const {
 
     if (!success) {
         GLCALL(glGetShaderInfoLog(shader, 512, nullptr, infoLog));
-        LOG("ERROR::SHADER_PROGRAM::COMPILATION_FAILED " << infoLog);
-    }
+        switch (type) {
+        case GL_VERTEX_SHADER:
+            LOG("[OpenGL Error] FRAGMENT_SHADER::COMPILATION_FAILED "
+                << infoLog);
+            break;
+        case GL_FRAGMENT_SHADER:
+            LOG("[OpenGL Error] VERTEX_SHADER::COMPILATION_FAILED " << infoLog);
+            break;
+        }
+    } else
+        switch (type) {
+        case GL_VERTEX_SHADER:
+            LOG("Vertex shader was compiled successfully");
+            break;
+        case GL_FRAGMENT_SHADER:
+            LOG("Fragment shader was compiled successfully");
+            break;
+        }
 
     return shader;
 }
@@ -23,11 +40,9 @@ unsigned int Shader::create_shader(const char *shader_src, int type) const {
 unsigned int Shader::compile_shader() const {
     unsigned int vertexShader =
         create_shader(vert_str.c_str(), GL_VERTEX_SHADER);
-    LOG("Vertex shader was compiled successfully");
 
     unsigned int fragmentShader =
         create_shader(frag_str.c_str(), GL_FRAGMENT_SHADER);
-    LOG("Fragment shader was compiled successfully");
 
     unsigned int id = glCreateProgram();
     GLCALL(glAttachShader(id, vertexShader));
@@ -41,7 +56,7 @@ unsigned int Shader::compile_shader() const {
 
     if (!success) {
         GLCALL(glGetProgramInfoLog(id, 512, nullptr, infoLog));
-        LOG("ERROR::SHADER_PROGRAM::LINKING_FAILED " << infoLog);
+        LOG("[OpenGL Error] SHADER_PROGRAM::LINKING_FAILED " << infoLog);
     }
 
     GLCALL(glDeleteShader(vertexShader));
@@ -56,20 +71,21 @@ Shader::Shader(const std::string &vert_str, const std::string &frag_str)
 }
 
 void Shader::set_Uniform4f(const std::string &name, float v0, float v1,
-                           float v2, float v3) const {
-    GLCALL(glUniform4f(get_uniform_location(name), v0, v1, v2,
-                       v3)); // Transfer the uniform data to the shader
+                           float v2, float v3) {
+    GLCALL(glUniform4f(get_uniform_location(name), v0, v1, v2, v3));
 }
 
-/**
- * @brief Returns an integer that represents the location of a specific uniform
- * variable within a program object
- *
- * @param name
- * @return A location for a shader uniform thingy
- */
-unsigned int Shader::get_uniform_location(const std::string &name) const {
-    return glGetUniformLocation(m_id, name.c_str());
+int Shader::get_uniform_location(const std::string &name) {
+    static std::unordered_map<std::string, unsigned int> uniform_location_cache;
+
+    if (uniform_location_cache.find(name) != uniform_location_cache.end())
+        return uniform_location_cache[name];
+
+    GLCALL(int location = glGetUniformLocation(m_id, name.c_str()));
+    if (location == -1)
+        LOG("[WARNING] uniform variable " << name << " doesn't exist");
+    uniform_location_cache[name] = location;
+    return location;
 }
 
 void Shader::bind() const { GLCALL(glUseProgram(m_id)); }

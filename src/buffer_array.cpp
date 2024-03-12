@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 
-#include "include/buffer_array.hpp"
+#include "buffer_array.hpp"
 
 BufferArray::BufferArray() { glGenVertexArrays(1, &m_id); }
 

@@ -1,4 +1,4 @@
-#include "include/debug.hpp"
+#include "debug.hpp"
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <iostream>

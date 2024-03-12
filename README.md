@@ -14,26 +14,29 @@ current features: triangles, triangles, triangles and bugs lol
 ### Running
 ```sh
 make
+
+# or
+#mkdir -p build
+#cmake . -B build
+#make -C build
 ```
 
 ### Building
 ```sh
-# NOTE: there are more modes (look at the Makefile)
-make debug
-#make release
-#make all
-```
+make compile
 
-Speed up compilation with the -j flag to control the parallel job count
-
-```sh
-make -j 4
+# or
+#mkdir -p build
+#cmake . -B build
 ```
 
 ## Requirements
 Ensure you have the following installed on your system
 
 ### GLFW
+<details>
+<summary>How to install GLFW manually on a Debian based system</summary>
+
 ```sh
 # installs GLFW on debian based systems
 sudo apt-get install -y make cmake git
@@ -42,13 +45,35 @@ sudo cmake -S "/usr/local/lib/glfw" -B "/usr/local/lib/glfw/build"
 sudo make -C "/usr/local/lib/glfw/build"
 sudo make -C "/usr/local/lib/glfw/build" install
 ```
+</details>
+
+<details>
+  <summary>How to install GLFW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
+
+  ```sh
+  vcpkg install --head glfw3
+  ```
+</details>
 
 ### GLEW
+
+<details>
+<summary>How to install GLEW manually on a Debian based system</summary>
+
 ```sh
 # installs GLEW on debian based systems
 sudo apt-get update
 sudo apt-get install -y libglew-dev
 ```
+</details>
+
+<details>
+  <summary>How to install GLEW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
+
+  ```sh
+  vcpkg install --head glew
+  ```
+</details>
 
 ## LSP and compilation databases
 

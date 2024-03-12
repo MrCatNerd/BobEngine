@@ -1,12 +1,20 @@
-# Custom
-bin/
-obj/
-
-# Bear stuff
-# when BobEngine will use cmake i will need to update this probably
-compile_commands.json
+### Custom ###
+build
 .cache
 
+### CMake ###
+MakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+### C++ ###
 # Prerequisites
 *.d
 
