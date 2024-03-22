@@ -12,10 +12,8 @@ class Buffer {
         void unbind() const;
         void data(const void *data, int size) const;
         void setupVertexAttribPointer(int size, unsigned int type,
-                                      unsigned int normalized,
-                                      const void *pointer,
-                                      unsigned int jumps) const;
-
+                                      unsigned char normalized,
+                                      const void *pointer) const;
         unsigned int get_id() const;
 
         ~Buffer();

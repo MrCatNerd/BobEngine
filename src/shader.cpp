@@ -4,7 +4,7 @@
 #include "shader.hpp"
 #include "debug.hpp"
 
-unsigned int Shader::create_shader(const char *shader_src, int type) const {
+unsigned int Shader::create_shader(const char *shader_src, int type) {
     unsigned int shader = glCreateShader(type);
     GLCALL(glShaderSource(shader, 1, &shader_src, nullptr));
     GLCALL(glCompileShader(shader));
@@ -27,22 +27,22 @@ unsigned int Shader::create_shader(const char *shader_src, int type) const {
     } else
         switch (type) {
         case GL_VERTEX_SHADER:
-            LOG("Vertex shader was compiled successfully");
+            LOG("Vertex shader #" << shader << " was compiled successfully");
             break;
         case GL_FRAGMENT_SHADER:
-            LOG("Fragment shader was compiled successfully");
+            LOG("Fragment shader #" << shader << " was compiled successfully");
             break;
         }
 
     return shader;
 }
 
-unsigned int Shader::compile_shader() const {
+unsigned int Shader::compile_shaders() {
     unsigned int vertexShader =
-        create_shader(vert_str.c_str(), GL_VERTEX_SHADER);
+        Shader::create_shader(vert_str.c_str(), GL_VERTEX_SHADER);
 
     unsigned int fragmentShader =
-        create_shader(frag_str.c_str(), GL_FRAGMENT_SHADER);
+        Shader::create_shader(frag_str.c_str(), GL_FRAGMENT_SHADER);
 
     unsigned int id = glCreateProgram();
     GLCALL(glAttachShader(id, vertexShader));
@@ -59,6 +59,7 @@ unsigned int Shader::compile_shader() const {
         LOG("[OpenGL Error] SHADER_PROGRAM::LINKING_FAILED " << infoLog);
     }
 
+    // delete the shaders (not the program)
     GLCALL(glDeleteShader(vertexShader));
     GLCALL(glDeleteShader(fragmentShader));
 
@@ -67,11 +68,12 @@ unsigned int Shader::compile_shader() const {
 
 Shader::Shader(const std::string &vert_str, const std::string &frag_str)
     : vert_str(vert_str), frag_str(frag_str) {
-    m_id = compile_shader();
+    this->m_id = compile_shaders();
 }
 
 void Shader::set_Uniform4f(const std::string &name, float v0, float v1,
                            float v2, float v3) {
+    this->bind();
     GLCALL(glUniform4f(get_uniform_location(name), v0, v1, v2, v3));
 }
 
@@ -89,6 +91,6 @@ int Shader::get_uniform_location(const std::string &name) {
 }
 
 void Shader::bind() const { GLCALL(glUseProgram(m_id)); }
-void Shader::unbind() const { GLCALL(glUseProgram(0)); }
+void Shader::unbind() { GLCALL(glUseProgram(0)); }
 
 Shader::~Shader() { GLCALL(glDeleteProgram(m_id)); }

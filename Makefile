@@ -10,11 +10,11 @@ compile: build
 	make -C build
 
 clean:
-	rm BobEngine
-	rm compile_commands.json
-	rm -r build
-	rm CMakeCache.txt
-	rm -r .cache
+	rm -f BobEngine
+	rm -rf build
+	rm -f CMakeCache.txt
+	rm -rf .cache
+	rm -f compile_commands.json
 
 
 compile_commands.json: build

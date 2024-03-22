@@ -6,6 +6,6 @@ BufferArray::BufferArray() { glGenVertexArrays(1, &m_id); }
 
 void BufferArray::bind() const { glBindVertexArray(m_id); }
 
-void BufferArray::unbind() const { glBindVertexArray(0); }
+void BufferArray::unbind() { glBindVertexArray(0); }
 
 BufferArray::~BufferArray() { glDeleteVertexArrays(1, &m_id); }

@@ -8,7 +8,7 @@ class BufferArray {
         BufferArray();
 
         void bind() const;
-        void unbind() const;
+        static void unbind();
 
         unsigned int get_id() const;
 

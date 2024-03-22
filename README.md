@@ -5,10 +5,12 @@ current features: triangles, triangles, triangles and bugs lol
 
 ---
 
-<img src="https://github.com/MrCatNerd/BobEngine/blob/dev/res/bob.jpg?raw=true" alt="Bob" style="max-width:80%; max-height:80%;">
+<img src="https://github.com/MrCatNerd/BobEngine/blob/dev/res/bob.jpg?raw=true" alt="Bob Ross" style="max-width:70%; max-height:70%;">
 
-### WARNING: this engine is still a WIP
+> [!WARNING]
+> this engine is still a WIP
 
+---
 
 ## Compiling Running and Cleaning
 
@@ -39,7 +41,7 @@ Ensure you have the following installed on your system
 ```sh
 # installs GLFW on debian based systems
 sudo apt-get install -y make cmake git
-sudo git clone https://github.com/glfw/glfw.git "/usr/local/lib/glfw" --depth 1
+sudo git clone "https://github.com/glfw/glfw.git" "/usr/local/lib/glfw" --depth 1
 sudo cmake -S "/usr/local/lib/glfw" -B "/usr/local/lib/glfw/build"
 sudo make -C "/usr/local/lib/glfw/build"
 sudo make -C "/usr/local/lib/glfw/build" install
@@ -47,11 +49,11 @@ sudo make -C "/usr/local/lib/glfw/build" install
 </details>
 
 <details>
-  <summary>How to install GLFW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
+<summary>How to install GLFW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
 
-  ```sh
-  vcpkg install glfw3
-  ```
+```sh
+vcpkg install glfw3
+```
 </details>
 
 ### GLEW
@@ -66,22 +68,36 @@ sudo apt-get install -y libglew-dev
 </details>
 
 <details>
-  <summary>How to install GLEW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
-
-  ```sh
-  vcpkg install glew
-  ```
-</details>
-
-### OpenGL???
-idk cmake wants glfw, glew and opengl... just install it from vcpkg:
+<summary>How to install GLEW with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
 
 ```sh
+vcpkg install glew
+```
+</details>
+
+### OpenGL
+
+<details>
+<summary>How to install OpenGL manually on a Debian based system</summary>
+
+```sh
+sudo apt-get install -y libgl1-mesa-dev
+```
+
+</details>
+
+<details>
+<summary>How to install OpenGL with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
+
+```sh
+# installs OpenGL on debian based systems
 vcpkg install opengl
 ```
 
+</details>
 
-## LSP and compilation databases
+
+## Compilation databases
 
 ```sh
 make compile_commands.json
@@ -93,9 +109,10 @@ make compile_commands.json
 ## TODO
 mostly sorted by priority
 
- - [ ] The whole engine thingy
- - [x] CMake
- - [ ] Good README
- - [ ] Examples
- - [ ] Docs
- - [ ] Tests (i got no idea how do you test a game engine)
+- [ ] The whole engine thingy
+- [x] CMake
+- [ ] Good README
+- [ ] a THICC TOC
+- [ ] Examples
+- [ ] Docs
+- [ ] Tests (i got no idea how do you test a game engine)

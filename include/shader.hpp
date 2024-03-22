@@ -13,7 +13,7 @@ class Shader {
         Shader(const std::string &vert_str, const std::string &frag_str);
 
         void bind() const;
-        void unbind() const;
+        static void unbind();
 
         void set_Uniform4f(const std::string &name, float v0, float v1,
                            float v2, float v3);
@@ -23,7 +23,7 @@ class Shader {
         ~Shader();
 
     private:
-        unsigned int compile_shader() const;
-        unsigned int create_shader(const char *shader_src, int type) const;
+        unsigned int compile_shaders();
+        static unsigned int create_shader(const char *shader_src, int type);
         int get_uniform_location(const std::string &name);
 };

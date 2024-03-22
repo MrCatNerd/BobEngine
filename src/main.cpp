@@ -8,8 +8,8 @@
 
 // Engine stuff
 
-#include "buffer_array.hpp"
 #include "buffer.hpp"
+#include "buffer_array.hpp"
 #include "shader.hpp"
 
 #include "debug.hpp"
@@ -21,6 +21,7 @@ static inline void framebuffer_size_callback(GLFWwindow *window, int width,
 
 static inline void processInput(GLFWwindow *window);
 
+// TODO: settings from a json file or smh
 // Settings
 static const unsigned int SCREEN_WIDTH = 800;
 static const unsigned int SCREEN_HEIGHT = 600;
@@ -68,26 +69,26 @@ int main(void) {
     int nrAttributes;
     GLCALL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes));
     LOG("Maximum number of vertex attributes supported: " << nrAttributes)
-#endif
 
     LOG("Starting to generate the lil triangle");
 
     // Build and compile shader program
     LOG("Creating a shader program");
-    std::string vertexShaderSource = GetFile("res/shaders/vert.glsl");
-
-    std::string fragmentShaderSource = GetFile("res/shaders/frag.glsl");
-
-    Shader shader(fragmentShaderSource, vertexShaderSource);
-    shader.bind();
-    shader.set_Uniform4f("u_Time", 0.0, 0.0, 0.0, 0.0);
-
-    float vertices[] = {
+#endif
+    /* float vertices[] = {
         //    Position     |      Color
         0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, // top right
         0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.8f, // bottom right
         -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
         -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, // top left
+    }; */
+
+    float vertices[] = {
+        //    Position
+        0.5f,  0.5f,  0.0f, // top right
+        0.5f,  -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f,  0.0f, // top left
     };
 
     unsigned int indices[] = {
@@ -108,28 +109,41 @@ int main(void) {
 
     vao.bind();
 
-    Buffer ebo(GL_ELEMENT_ARRAY_BUFFER);
     Buffer vbo(GL_ARRAY_BUFFER);
+    Buffer ebo(GL_ELEMENT_ARRAY_BUFFER);
 
     // VBO
     vbo.bind();
     vbo.data(vertices, sizeof(vertices));
 
-    vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE, (void *)0, 1);
-    vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE,
-                                 (void *)(3 * sizeof(float)), 1);
+    vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE, (void *)0);
+    // vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE,
+    //                              (void *)(3 * sizeof(float)));
 
+    // EBO
     ebo.bind();
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-                 GL_STATIC_DRAW);
+    ebo.data(indices, sizeof(indices));
+
+    // Shaders
+    std::string vertexShaderSource = GetFile("res/shaders/vert.glsl");
+
+    std::string fragmentShaderSource = GetFile("res/shaders/frag.glsl");
+
+    Shader shader(vertexShaderSource, fragmentShaderSource);
+
+    shader.bind();
+    // shader.set_Uniform4f("u_Time", 0.0, 0.0, 0.0, 0.0);
 
     LOG("Finished generating our lil triangle");
 
     // Clear stuff
     GLCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
     GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    vbo.unbind();
+    ebo.unbind();
+    BufferArray::unbind();
     GLCALL(glBindVertexArray(0));
-    GLCALL(glUseProgram(0));
+    Shader::unbind();
 
     LOG("Starting main loop...");
 
@@ -154,7 +168,7 @@ int main(void) {
         shader.bind();
 
         // Set the uniform
-        // shader.set_Uniform4f("u_Time", r, r, r, r);
+        // shader.st_Uniform4f("u_Time", r, r, r, r);
 
         // Bind VAO and EBO
         vao.bind();
@@ -201,6 +215,9 @@ static inline void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_W) && lock == 0) {
         glPolygonMode(GL_FRONT_AND_BACK,
                       (wf_mode = 1 - wf_mode) ? GL_LINE : GL_FILL);
+        LOG("Line Mode: "
+            << (bool)(wf_mode =
+                          1 - wf_mode)); // FIXME: yea no worky only prints 0
         lock = 1;
     }
 }
@@ -213,10 +230,10 @@ static inline void processInput(GLFWwindow *window) {
 // [ ] better errors
 // --------- extras ---------
 // [ ] cool shader
-// [ ] CMAKE
 // [ ] find out why program fails when i don't bind the EBO every frame (the VAO
 // should be doing that automatically)
 // --------- done ---------
+// [x] CMAKE
 // [x] include folder without clangd lsp freaking out
 // [x] fix stupid shader errors
 // [x] file reading (for shaders)
