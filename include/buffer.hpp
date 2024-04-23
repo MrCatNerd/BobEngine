@@ -1,20 +1,24 @@
 #pragma once
 
+#include <GL/glew.h>
+
+#include "debug.hpp"
+
 class Buffer {
     private:
         unsigned int m_id = 0;
-        unsigned int m_type = 0;
+        int m_buffer_type;
 
     public:
-        Buffer(int type);
+        Buffer(int buffer_type, unsigned int size, void *data);
+        ~Buffer();
 
-        void bind() const;
-        void unbind() const;
-        void data(const void *data, int size) const;
+        inline void bind() const {
+            GLCALL(glBindBuffer(this->m_buffer_type, this->m_id));
+        }
+        inline void unbind() { GLCALL(glBindBuffer(this->m_buffer_type, 0)); }
+
         void setupVertexAttribPointer(int size, unsigned int type,
                                       unsigned char normalized,
                                       const void *pointer) const;
-        unsigned int get_id() const;
-
-        ~Buffer();
 };

@@ -1,26 +1,39 @@
-.PHONY: default compile run clean
+BUILD_DIR := build
+
+EXECUTABLE_NAME := BobEngine
+
+# Build profile
+PROFILE ?= Debug
+
+#########
 
 default: run
+.PHONY: default
+
+all: compile compile_commands.json
+.PHONY: all
 
 run: compile
-	./BobEngine
+	./$(BUILD_DIR)/$(PROFILE)/bin/$(EXECUTABLE_NAME)
+.PHONY: run
 
 compile: build
-	cmake -B build -S .
-	make -C build
+	cmake -B $(BUILD_DIR) -S . -DCMAKE_BUILD_TYPE=$(PROFILE)
+	cmake --build $(BUILD_DIR)
+.PHONY: compile
 
 clean:
-	rm -f BobEngine
-	rm -rf build
+	rm -f $(EXECUTABLE_NAME)
+	rm -rf $(BUILD_DIR)
 	rm -f CMakeCache.txt
 	rm -rf .cache
 	rm -f compile_commands.json
-
+.PHONY: clean
 
 compile_commands.json: build
 	cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build -S .
 	cp build/compile_commands.json .
 
 build:
-	@mkdir build
+	@mkdir -p $(BUILD_DIR)
 

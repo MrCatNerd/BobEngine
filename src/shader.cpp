@@ -5,8 +5,8 @@
 #include "debug.hpp"
 
 unsigned int Shader::create_shader(const char *shader_src, int type) {
-    unsigned int shader = glCreateShader(type);
-    GLCALL(glShaderSource(shader, 1, &shader_src, nullptr));
+    GLCALL(unsigned int shader = glCreateShader(type));
+    GLCALL(glShaderSource(shader, 1, &shader_src, NULL));
     GLCALL(glCompileShader(shader));
 
     int success;
@@ -27,10 +27,12 @@ unsigned int Shader::create_shader(const char *shader_src, int type) {
     } else
         switch (type) {
         case GL_VERTEX_SHADER:
-            LOG("Vertex shader #" << shader << " was compiled successfully");
+            LOG("[DEBUG] Vertex shader #" << shader
+                                          << " was compiled successfully");
             break;
         case GL_FRAGMENT_SHADER:
-            LOG("Fragment shader #" << shader << " was compiled successfully");
+            LOG("[DEBUG] Fragment shader #" << shader
+                                            << " was compiled successfully");
             break;
         }
 
@@ -39,10 +41,10 @@ unsigned int Shader::create_shader(const char *shader_src, int type) {
 
 unsigned int Shader::compile_shaders() {
     unsigned int vertexShader =
-        Shader::create_shader(vert_str.c_str(), GL_VERTEX_SHADER);
+        Shader::create_shader(m_vert_str.c_str(), GL_VERTEX_SHADER);
 
     unsigned int fragmentShader =
-        Shader::create_shader(frag_str.c_str(), GL_FRAGMENT_SHADER);
+        Shader::create_shader(m_frag_str.c_str(), GL_FRAGMENT_SHADER);
 
     unsigned int id = glCreateProgram();
     GLCALL(glAttachShader(id, vertexShader));
@@ -59,6 +61,8 @@ unsigned int Shader::compile_shaders() {
         LOG("[OpenGL Error] SHADER_PROGRAM::LINKING_FAILED " << infoLog);
     }
 
+    this->bind();
+
     // delete the shaders (not the program)
     GLCALL(glDeleteShader(vertexShader));
     GLCALL(glDeleteShader(fragmentShader));
@@ -67,7 +71,7 @@ unsigned int Shader::compile_shaders() {
 }
 
 Shader::Shader(const std::string &vert_str, const std::string &frag_str)
-    : vert_str(vert_str), frag_str(frag_str) {
+    : m_vert_str(vert_str), m_frag_str(frag_str) {
     this->m_id = compile_shaders();
 }
 
@@ -89,8 +93,5 @@ int Shader::get_uniform_location(const std::string &name) {
     uniform_location_cache[name] = location;
     return location;
 }
-
-void Shader::bind() const { GLCALL(glUseProgram(m_id)); }
-void Shader::unbind() { GLCALL(glUseProgram(0)); }
 
 Shader::~Shader() { GLCALL(glDeleteProgram(m_id)); }

@@ -1,15 +1,15 @@
 #pragma once
 
-// NOTE: changing the building mode of the makefile won't disable debugging
-// automatically and vice versa
-// #define __DEBUG__ // comment this line to disable debugging code
+#ifndef NDEBUG
+#define _DEBUG
+#endif // !NDEBUG
 
 #include <GLFW/glfw3.h>
 
 void clear_error();
 GLenum glCheckError_(const char *file, int line);
 
-#ifdef __DEBUG__
+#ifdef _DEBUG
 
 // ASSERT and GLCALL macros
 #define ASSERT(x)                                                              \
@@ -28,7 +28,12 @@ GLenum glCheckError_(const char *file, int line);
     glCheckError_(__FILE__, __LINE__)
 
 // LOG macro
+
 #include <iostream>
+
+// NOTE: convention for log:
+// #<number> is generally an id
+
 #define LOG(x)                                                                 \
     std::cout << x << std::endl; // idk why but neovim :make command doesnt see
                                  // output when it aint endl

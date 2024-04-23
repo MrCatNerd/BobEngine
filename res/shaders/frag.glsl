@@ -1,14 +1,9 @@
 // fragment
 
-#version 410 core
-// in vec4 ourColor; // Use ourColor from the vertex shader
-out vec4 FragColor; // Changed to 'out' variable
-
-uniform vec4 u_Time;
+#version 330 core
+out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(1, 1, 1, 1);
-    // FragColor = 1 - ourColor * u_Time;
-    // FragColor = 1 - normalize(vec4(ourColor.r, u_Time.g, u_Time.b, 1.0));
-};
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+}

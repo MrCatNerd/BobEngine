@@ -8,6 +8,13 @@
 #include <string>
 #include <GLFW/glfw3.h>
 
+/// Don`t you worry 'bout it
+void EngineError(const std::string &error_msg) {
+    std::cerr << error_msg << std::endl;
+    glfwTerminate();
+    exit(-1);
+}
+
 /// Get the content of a file
 std::string GetFile(const std::string &path) {
     std::string content;
@@ -26,18 +33,12 @@ std::string GetFile(const std::string &path) {
             std::cerr << "Unable to open file '" << path << "'" << std::endl;
         }
     } catch (std::ifstream::failure e) {
-        std::cout << "[Reading Error] FILE_READ::FILE_NOT_SUCCESFULLY_READ L "
+        std::cout << "[FS ERROR] FILE_READ::FILE_NOT_SUCCESFULLY_READ L "
                      "BOZO HOW DID YOU FAIL THIS?"
                   << std::endl;
     }
 
     return content;
-}
-
-/// Custom error function thingy... dont you worry about it
-void glfwError(std::string msg) {
-    std::cout << msg << std::endl;
-    glfwTerminate();
 }
 
 /// Takes a symbolic type constant and returns its size

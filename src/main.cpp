@@ -1,241 +1,156 @@
-// normal stuff
+// Normal includes
 #include <iostream>
-#include <string>
 
-// OpenGL stuff
+// OpenGL includes
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-// Engine stuff
-
+// Engine includes
 #include "buffer.hpp"
-#include "buffer_array.hpp"
-#include "shader.hpp"
-
 #include "debug.hpp"
+#include "shader.hpp"
 #include "utils.hpp"
 
-// Prototypes
+// prototypes
 static inline void framebuffer_size_callback(GLFWwindow *window, int width,
                                              int height);
 
 static inline void processInput(GLFWwindow *window);
 
-// TODO: settings from a json file or smh
-// Settings
-static const unsigned int SCREEN_WIDTH = 800;
-static const unsigned int SCREEN_HEIGHT = 600;
-static const bool VSYNC = false; // set to true to enable VSync
-// #define __MAC__                  // if you are on MacOS uncomment this line
+// constants
+static const unsigned int WINDOW_WIDTH = 720;
+static const unsigned int WINDOW_HEIGHT = 600;
+static const bool VSYNC = false;
 
 int main(void) {
-    // Initialize and configure glfw
+    LOG("[DEBUG] Initializing GLFW");
     if (!glfwInit()) {
-        glfwError("Failed to initialize GLFW!");
-        return -1;
+        EngineError("[ERROR] Failed to initialize GLFW!");
     }
 
-    GLCALL(glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3));
-    GLCALL(glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3));
-    GLCALL(glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE));
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __MAC__
-    GLCALL(glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE));
-#endif
-
-    // Glfw window creation
-    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT,
-                                          "BobEngine", nullptr, nullptr);
-    if (window == nullptr) {
-        glfwError("Failed to create GLFW window");
-        return -1;
+    LOG("[DEBUG] Initializing window");
+    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT,
+                                          "Hello World!", NULL, NULL);
+    if (window == NULL) {
+        EngineError("[ERROR] Failed to create GLFW window");
     }
 
-    GLCALL(glfwMakeContextCurrent(window));
-    GLCALL(glfwSetFramebufferSizeCallback(window, framebuffer_size_callback));
-    GLCALL(glfwSwapInterval((int)VSYNC)); // vsync
+    glfwMakeContextCurrent(window);
 
-    // Glew: load all OpenGL function pointers
+    LOG("[DEBUG] Initializing GLEW");
+
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        std::cerr << "GLEW initialization failed: " << glewGetErrorString(err)
-                  << std::endl;
-        return -1;
+        EngineError("[ERROR] GLEW initialization failed: " +
+                    std::string(reinterpret_cast<const char *>(
+                        glewGetErrorString(err))));
     }
 
-    LOG("Initialized OpenGL\nOpenGL Version: " << glGetString(GL_VERSION));
+    LOG("[DEBUG] Setting stuff up")
+    GLCALL(glfwSwapInterval((int)VSYNC)); // vsync
+    GLCALL(glfwSetFramebufferSizeCallback(window, framebuffer_size_callback));
 
-#ifdef __DEBUG__
+    LOG("[DEBUG] Initialized OpenGL\n[DEBUG] OpenGL Version: "
+        << glGetString(GL_VERSION));
+
+#ifdef _DEBUG
+
     int nrAttributes;
     GLCALL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes));
-    LOG("Maximum number of vertex attributes supported: " << nrAttributes)
+    LOG("[DEBUG] Maximum number of vertex attributes supported: "
+        << nrAttributes)
 
-    LOG("Starting to generate the lil triangle");
-
-    // Build and compile shader program
-    LOG("Creating a shader program");
 #endif
-    /* float vertices[] = {
-        //    Position     |      Color
-        0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, // top right
-        0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.8f, // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-        -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, // top left
-    }; */
+
+    // initialize general stuff
 
     float vertices[] = {
-        //    Position
         0.5f,  0.5f,  0.0f, // top right
         0.5f,  -0.5f, 0.0f, // bottom right
         -0.5f, -0.5f, 0.0f, // bottom left
-        -0.5f, 0.5f,  0.0f, // top left
+        -0.5f, 0.5f,  0.0f  // top left
     };
-
     unsigned int indices[] = {
-        0, 1, 3, // First triangle (top-left, bottom-left, bottom-right)
-        1, 2, 3  // Second triangle (top-left, bottom-right, top-right)
+        // note that we start from 0!
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
     };
 
-    LOG("Creating VBOs, VAOs and EBOs");
-
-    // IDs
     unsigned int VAO;
-
-    // VAO
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    BufferArray vao;
+    Buffer vboffa(GL_ARRAY_BUFFER, sizeof(vertices), vertices);
+    Buffer eboffa(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices);
+    vboffa.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE, (void *)(0));
 
-    vao.bind();
+    const std::string vert_src = GetFile("res/shaders/vert.glsl");
+    const std::string frag_src = GetFile("res/shaders/frag.glsl");
 
-    Buffer vbo(GL_ARRAY_BUFFER);
-    Buffer ebo(GL_ELEMENT_ARRAY_BUFFER);
+    Shader shader(vert_src, frag_src);
 
-    // VBO
-    vbo.bind();
-    vbo.data(vertices, sizeof(vertices));
+    // engine go bRRRRRRRRRRRRRRRRRRRRRR
 
-    vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE, (void *)0);
-    // vbo.setupVertexAttribPointer(3, GL_FLOAT, GL_FALSE,
-    //                              (void *)(3 * sizeof(float)));
+    LOG("[DEBUG] starting main loop");
 
-    // EBO
-    ebo.bind();
-    ebo.data(indices, sizeof(indices));
-
-    // Shaders
-    std::string vertexShaderSource = GetFile("res/shaders/vert.glsl");
-
-    std::string fragmentShaderSource = GetFile("res/shaders/frag.glsl");
-
-    Shader shader(vertexShaderSource, fragmentShaderSource);
-
-    shader.bind();
-    // shader.set_Uniform4f("u_Time", 0.0, 0.0, 0.0, 0.0);
-
-    LOG("Finished generating our lil triangle");
-
-    // Clear stuff
-    GLCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-    vbo.unbind();
-    ebo.unbind();
-    BufferArray::unbind();
-    GLCALL(glBindVertexArray(0));
-    Shader::unbind();
-
-    LOG("Starting main loop...");
-
-    float r = 1.0;
-    float increment = 0.05;
-    float lastTime = glfwGetTime();
+    float last_time = glfwGetTime();
     float deltaTime;
 
     while (!glfwWindowShouldClose(window)) {
-        // Get delta time
-        deltaTime = glfwGetTime() - lastTime;
-        lastTime = glfwGetTime();
+
+        // Compute delta time
+        deltaTime = glfwGetTime() - last_time;
+        last_time = glfwGetTime();
+
+        // Lets color up that boi
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         // Proccess input
         processInput(window);
 
-        // Clear the frame buffer
-        GLCALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-        GLCALL(glClear(GL_COLOR_BUFFER_BIT));
-
-        // Bind a shader
         shader.bind();
+        glBindVertexArray(VAO);
+        eboffa.bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Set the uniform
-        // shader.st_Uniform4f("u_Time", r, r, r, r);
+        // Flippety flip the buffers
+        GLCALL(glfwSwapBuffers(window));
 
-        // Bind VAO and EBO
-        vao.bind();
-        ebo.bind();
-
-        // Draw
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-        // Change r by time and stuff
-        if (r > 2) {
-            increment = -0.05 * deltaTime * 60;
-        } else if (r < 0) {
-            increment = 0.05 * deltaTime * 60;
-        }
-
-        r += increment;
-
-        glfwSwapBuffers(window); // Swap frame buffers
-        glfwPollEvents();        // Poll for events (amazing explanation)
+        GLCALL(glfwPollEvents());
     }
 
-    LOG("Cleaning up...");
-
+    LOG("[DEBUG] mission failed successfully, shutting down...");
+    // terminate opengl stuff
     glfwTerminate();
-    LOG("GLFW was terminated successfully... mission failed successfully!");
 
     return 0;
 }
 
-static inline void framebuffer_size_callback(GLFWwindow *window, int width,
-                                             int height) {
-    glViewport(0, 0, width, height);
-}
-
 static inline void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) ==
-        GLFW_PRESS) // Press escape to exit program
-        glfwSetWindowShouldClose(window, true);
+        GLFW_PRESS) { // Press escape to exit program
+        GLCALL(glfwSetWindowShouldClose(window, true));
+    }
 
     static bool lock = 0, wf_mode = 0;
     if (!glfwGetKey(window, GLFW_KEY_W)) { // press W to toggle wireframe mode
         lock = 0;
     }
     if (glfwGetKey(window, GLFW_KEY_W) && lock == 0) {
-        glPolygonMode(GL_FRONT_AND_BACK,
-                      (wf_mode = 1 - wf_mode) ? GL_LINE : GL_FILL);
-        LOG("Line Mode: "
-            << (bool)(wf_mode =
-                          1 - wf_mode)); // FIXME: yea no worky only prints 0
+        GLCALL(glPolygonMode(GL_FRONT_AND_BACK,
+                             (wf_mode = 1 - wf_mode) ? GL_LINE : GL_FILL));
+        LOG("[DEBUG] wireframe mode toggled: " << ((wf_mode == true) ? "on"
+                                                                     : "off"));
         lock = 1;
     }
 }
 
-// TODO:
-// sorted mostly by priority
-// --------------------------
-// [ ] shader abstraction
-// [ ] small cleanup
-// [ ] better errors
-// --------- extras ---------
-// [ ] cool shader
-// [ ] find out why program fails when i don't bind the EBO every frame (the VAO
-// should be doing that automatically)
-// --------- done ---------
-// [x] CMAKE
-// [x] include folder without clangd lsp freaking out
-// [x] fix stupid shader errors
-// [x] file reading (for shaders)
-// [x] deltaTime
-// [x] vsync support (literally 2 lines of code)
+static inline void framebuffer_size_callback(GLFWwindow *window, int width,
+                                             int height) {
+    GLCALL(glViewport(0, 0, width, height));
+}

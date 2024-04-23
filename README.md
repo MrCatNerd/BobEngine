@@ -14,22 +14,39 @@ current features: triangles, triangles, triangles and bugs lol
 
 ## Compiling Running and Cleaning
 
-### Running
+### General Stuff
 ```sh
+### Running
 make
 # or
 #make run
-```
 
-### Building
-```sh
+### Compiling
 make compile
-```
 
 ### Cleaning
-```sh
 make clean
 ```
+
+### Build profiles
+```sh
+# Debug mode (default)
+make PROFILE=Debug
+
+# Release mode
+make PROFILE=Release
+
+# If you want to only compile
+#make compile PROFILE=<profile>
+```
+
+### Compilation databases
+
+```sh
+make compile_commands.json
+```
+
+---
 
 ## Requirements
 Ensure you have the following installed on your system
@@ -95,13 +112,6 @@ vcpkg install opengl
 ```
 
 </details>
-
-
-## Compilation databases
-
-```sh
-make compile_commands.json
-```
 
 ---
 
