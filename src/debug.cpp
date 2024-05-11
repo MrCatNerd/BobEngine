@@ -1,7 +1,9 @@
-#include "debug.hpp"
+#include <iostream>
+
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
+
+#include "debug.hpp"
 
 void clear_error() {
     while (glGetError() != GL_NO_ERROR)
@@ -36,12 +38,16 @@ GLenum glCheckError_(const char *file, int line) {
         case GL_INVALID_FRAMEBUFFER_OPERATION:
             error = "INVALID_FRAMEBUFFER_OPERATION";
             break;
+        default:
+            error = "Unrecognized error code";
+            break;
         }
 
         errorCount++;
-        std::cout << "[OpenGL Error] " << error << " | " << file << ":" << line
-                  << " (error count: " << errorCount
-                  << " | error code:" << errorCode << ")" << std::endl;
+        if (errorCount <= 10)
+            std::cout << "[OpenGL Error] " << error << " | " << file << ":"
+                      << line << " (error count: " << errorCount
+                      << " | error code:" << errorCode << ")" << std::endl;
     }
     return errorCode;
 }

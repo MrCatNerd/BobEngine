@@ -1,4 +1,6 @@
 #include <GL/glew.h>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <unordered_map>
 
 #include "shader.hpp"
@@ -50,6 +52,8 @@ unsigned int Shader::compile_shaders() {
     GLCALL(glAttachShader(id, vertexShader));
     GLCALL(glAttachShader(id, fragmentShader));
     GLCALL(glLinkProgram(id));
+
+    // error handling stuff
     GLCALL(glValidateProgram(id));
 
     int success;
@@ -61,7 +65,8 @@ unsigned int Shader::compile_shaders() {
         LOG("[OpenGL Error] SHADER_PROGRAM::LINKING_FAILED " << infoLog);
     }
 
-    this->bind();
+    // bind the current id
+    GLCALL(glUseProgram(id));
 
     // delete the shaders (not the program)
     GLCALL(glDeleteShader(vertexShader));
@@ -75,22 +80,53 @@ Shader::Shader(const std::string &vert_str, const std::string &frag_str)
     this->m_id = compile_shaders();
 }
 
-void Shader::set_Uniform4f(const std::string &name, float v0, float v1,
-                           float v2, float v3) {
-    this->bind();
-    GLCALL(glUniform4f(get_uniform_location(name), v0, v1, v2, v3));
+// general datatypes
+void Shader::set_UniformBool(const std::string &name, bool value) const {
+    GLCALL(glUniform1i(this->get_uniform_location(name), value));
+}
+void Shader::set_Uniform1i(const std::string &name, int value) const {
+    GLCALL(glUniform1i(this->get_uniform_location(name), value));
+}
+void Shader::set_Uniform1f(const std::string &name, float value) const {
+    GLCALL(glUniform1f(this->get_uniform_location(name), value));
 }
 
-int Shader::get_uniform_location(const std::string &name) {
-    static std::unordered_map<std::string, unsigned int> uniform_location_cache;
+// vectors
+void Shader::set_Uniform3f(const std::string &name, float v0, float v1,
+                           float v2) const {
+    GLCALL(glUniform3f(this->get_uniform_location(name), v0, v1, v2));
+}
 
-    if (uniform_location_cache.find(name) != uniform_location_cache.end())
-        return uniform_location_cache[name];
+void Shader::set_Uniform4f(const std::string &name, float v0, float v1,
+                           float v2, float v3) const {
+    GLCALL(glUniform4f(this->get_uniform_location(name), v0, v1, v2, v3));
+}
 
-    GLCALL(int location = glGetUniformLocation(m_id, name.c_str()));
+void Shader::set_UniformMatrix4fv(const std::string &name,
+                                  glm::mat4 value) const {
+    GLCALL(glUniformMatrix4fv(this->get_uniform_location(name), 1, GL_FALSE,
+                              glm::value_ptr(value)));
+}
+
+void Shader::set_UniformMatrix3fv(const std::string &name,
+                                  glm::mat3 value) const {
+    GLCALL(glUniformMatrix3fv(this->get_uniform_location(name), 1, GL_FALSE,
+                              glm::value_ptr(value)));
+}
+
+int Shader::get_uniform_location(const std::string &name) const {
+
+    if (this->uniform_location_cache.find(name) !=
+        this->uniform_location_cache.end())
+        return this->uniform_location_cache[name];
+
+    int location = glGetUniformLocation(this->m_id, name.c_str());
+
     if (location == -1)
         LOG("[WARNING] uniform variable " << name << " doesn't exist");
-    uniform_location_cache[name] = location;
+
+    this->uniform_location_cache[name] = location;
+
     return location;
 }
 

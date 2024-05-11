@@ -60,8 +60,7 @@ Ensure you have the following installed on your system
 sudo apt-get install -y make cmake git
 sudo git clone "https://github.com/glfw/glfw.git" "/usr/local/lib/glfw" --depth 1
 sudo cmake -S "/usr/local/lib/glfw" -B "/usr/local/lib/glfw/build"
-sudo make -C "/usr/local/lib/glfw/build"
-sudo make -C "/usr/local/lib/glfw/build" install
+sudo make -C "/usr/local/lib/glfw/build" install # you can use cmake --build --install if you really want to
 ```
 </details>
 
@@ -107,8 +106,19 @@ sudo apt-get install -y libgl1-mesa-dev
 <summary>How to install OpenGL with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
 
 ```sh
-# installs OpenGL on debian based systems
 vcpkg install opengl
+```
+
+</details>
+
+### GLM
+I am too lazy to add debian installation instructions (maybe ill do it later)
+
+<details>
+<summary>How to install GLM with <a href="https://github.com/microsoft/vcpkg">vcpkg</a></summary>
+
+```sh
+vcpkg install glm
 ```
 
 </details>

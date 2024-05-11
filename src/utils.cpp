@@ -28,13 +28,13 @@ std::string GetFile(const std::string &path) {
             buffer << file.rdbuf();
             content = buffer.str();
             file.close();
-            LOG(std::string("File '") + path + "' successfully read");
+            LOG("[DEBUG] " + std::string("File '") + path +
+                "' successfully read");
         } else {
             std::cerr << "Unable to open file '" << path << "'" << std::endl;
         }
     } catch (std::ifstream::failure e) {
-        std::cout << "[FS ERROR] FILE_READ::FILE_NOT_SUCCESFULLY_READ L "
-                     "BOZO HOW DID YOU FAIL THIS?"
+        std::cout << "[FS ERROR] FILE_READ::FILE_NOT_SUCCESFULLY_READ"
                   << std::endl;
     }
 

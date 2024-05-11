@@ -16,8 +16,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>/lib")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Set the build typ
-# set(CMAKE_BUILD_TYPE Release)
+# Set the build type
+#set(CMAKE_BUILD_TYPE Release)
 add_compile_options(-g)
 add_compile_options(-Wall)
 
@@ -25,13 +25,14 @@ add_compile_options(-Wall)
 # OS specific stuff
 if(WIN32) # Windows
 elseif(APPLE) # Apple
+    add_compile_definitions(_MACOS)
 else() # Linux
 endif()
 
 # Define source files
 file(GLOB_RECURSE _SOURCE_FILES CONFIGURE_DEPENDS
-  "${PROJECT_SOURCE_DIR}/src/*.hpp"
-  "${PROJECT_SOURCE_DIR}/src/*.cpp"
+    GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp"
+    GLOB HEADERS "${PROJECT_SOURCE_DIR}/src/*.hpp"
 )
 
 # Exclude files starting with underscore '_<file>'
@@ -41,13 +42,17 @@ list(FILTER _SOURCE_FILES EXCLUDE REGEX ".*\\/_.*\\..*")
 add_executable(${PROJECT_NAME} ${_SOURCE_FILES})
 
 # Add packages
-find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
+
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_SOURCE_DIR}/include"
+    "${PROJECT_SOURCE_DIR}/deps"
     "${CMAKE_CURRENT_BINARY_DIR}"
     "${OPENGL_INCLUDE_DIR}"
 )
@@ -56,7 +61,9 @@ target_link_libraries(
     ${PROJECT_NAME} PRIVATE
     ${OPENGL_LIBRARIES}
     GLEW::GLEW
+    assimp::assimp
     glfw
+    glm::glm
 )
 
 # set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # compile_commands.json (you don't need this i got a thingy in the Makefile that does the same thing)

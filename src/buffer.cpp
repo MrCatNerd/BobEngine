@@ -2,32 +2,35 @@
 #include <GLFW/glfw3.h>
 
 #include "debug.hpp"
-#include "utils.hpp"
 #include "buffer.hpp"
 
-Buffer::Buffer(int buffer_type, unsigned int size, void *data)
-    : m_buffer_type(buffer_type) {
+Buffer::Buffer(int buffer_type) : m_buffer_type(buffer_type) {
     GLCALL(glGenBuffers(1, &this->m_id));
     this->bind();
-    GLCALL(glBufferData(this->m_buffer_type, size, data, GL_STATIC_DRAW));
+    LOG("[DEBUG] Generated buffer #" << this->m_id);
+}
 
-    LOG("[DEBUG] Generated buffer " << this->m_id);
+void Buffer::data(unsigned int size, void *data, unsigned int usage) const {
+    GLCALL(glBufferData(this->m_buffer_type, size, data, usage));
 }
 
 Buffer::~Buffer() { GLCALL(glDeleteBuffers(1, &this->m_id)); }
 
 void Buffer::setupVertexAttribPointer(int size, unsigned int type,
-                                      unsigned char normalized,
-                                      const void *pointer) const {
-    static unsigned int layout_index = 0;
+                                      unsigned char normalized, int stride,
+                                      const void *pointer,
+                                      bool reset_layout) const {
+    static unsigned int layout_index =
+        0; // if you change it to 1 the world ends btw
 
-    // calculate stride
-    unsigned short type_size = get_gl_type_size(type);
-    int stride = size * type_size;
+    if (reset_layout) {
+        layout_index = 0;
+    } else {
+    }
 
-    GLCALL(glVertexAttribPointer(layout_index, size, type, normalized,
-                                 3 * sizeof(float), pointer));
     GLCALL(glEnableVertexAttribArray(layout_index));
+    GLCALL(glVertexAttribPointer(layout_index, size, type, normalized, stride,
+                                 pointer));
 
     layout_index++;
 }
