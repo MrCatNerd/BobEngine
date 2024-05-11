@@ -15,8 +15,10 @@ current features: phong lighting, triangels, and BLOCKS
 <details>
 <summary>screenshots</summary>
 
+<img src="https://github.com/MrCatNerd/BobEngine/blob/main/res/readme_screenshots/screenshot1.png?raw=true" alt="screenshot" style="max-width:100%; max-height:50%;">
+
 </details>
-<img src="https://github.com/MrCatNerd/BobEngine/blob/dev/res/readme_screenshots/screenshot1.png?raw=true" alt="screenshot" style="max-width:50%; max-height:30%;">
+
 ---
 
 ## Compiling Running and Cleaning
