@@ -1,7 +1,7 @@
 # BobEngine
 BobEngine is a WIP game engine written in C++
 
-current features: triangles, triangles, triangles and bugs lol
+current features: phong lighting, triangels, and BLOCKS
 
 ---
 
@@ -10,6 +10,13 @@ current features: triangles, triangles, triangles and bugs lol
 > [!WARNING]
 > this engine is still a WIP
 
+---
+
+<details>
+<summary>screenshots</summary>
+
+</details>
+<img src="https://github.com/MrCatNerd/BobEngine/blob/dev/res/readme_screenshots/screenshot1.png?raw=true" alt="screenshot" style="max-width:50%; max-height:30%;">
 ---
 
 ## Compiling Running and Cleaning
@@ -129,7 +136,6 @@ vcpkg install glm
 ## TODO
 mostly sorted by priority
 
-- [ ] The whole engine thingy
 - [x] CMake
 - [ ] Good README
 - [ ] a THICC TOC
