@@ -1,2 +1,2 @@
-meson wrap glfw + glad
-basic OpenGL thingy
+- timer class
+- more control over vertex attribute pointers cuz i wanna load 3d models from files

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Shader.h"
+#include "Window.h"
 
 namespace Bob {
 

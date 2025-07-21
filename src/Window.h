@@ -13,6 +13,8 @@ class Window {
 
         bool shouldClose(void) { return glfwWindowShouldClose(this->window); }
 
+        void configure(void) const;
+
         void clear(const float r, const float g, const float b, const float a) {
             glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
