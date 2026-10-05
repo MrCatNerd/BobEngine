@@ -1,14 +1,11 @@
 # BobEngine
-BobEngine is a WIP game engine written in C++
+BobEngine is a "game engine" (not really lol) written in C++
 
 current features: phong lighting, triangels, and BLOCKS
 
 ---
 
 <img src="https://github.com/MrCatNerd/BobEngine/blob/dev/res/bob.jpg?raw=true" alt="Bob Ross" style="max-width:70%; max-height:70%;">
-
-> [!WARNING]
-> this engine is still a WIP
 
 ---
 
